@@ -1,0 +1,6 @@
+[submodule "StraitXPackages/base"]
+	path = StraitXPackages/base
+	url = https://github.com/straitx/base
+[submodule "StraitXPackages/2d"]
+	path = StraitXPackages/2d
+	url = https://github.com/straitx/2d
