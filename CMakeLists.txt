@@ -11,6 +11,7 @@ add_subdirectory(StraitXPackages/Base)
 set(SAMPLE_SOURCES
     "./sources/main.cpp"
     "./sources/utils.cpp"
+    "./sources/ray_tracing_pipeline.cpp"
 )
 
 set(SAMPLE_INCLUDE
