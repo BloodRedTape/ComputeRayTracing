@@ -19,16 +19,17 @@ private:
 public:
     void UploadToGPU() {
         int count = Size();
-        const int count_size = sizeof(count);
-        const int positions_size = count * sizeof(Type);
+        int count_size = sizeof(count);
+        int positions_offset = Math::AlignUp<size_t>(count_size, alignof(Type));
+        int positions_size = count * sizeof(Type);
 
-        const int required_size = count_size + positions_size;
+        int required_size = positions_offset + positions_size;
         
         if (m_StorageBuffer->Size() < required_size)
             m_StorageBuffer->Realloc(required_size);
 
         m_StorageBuffer->Copy(&count,           count_size, 0);
-        m_StorageBuffer->Copy(&(*this)[0],  positions_size, Math::AlignUp<size_t>(count_size, alignof(Type)));
+        m_StorageBuffer->Copy(&(*this)[0],  positions_size, positions_offset);
     }
 
     operator const Buffer*()const {

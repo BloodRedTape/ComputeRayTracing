@@ -36,13 +36,16 @@ public:
         m_Window(width, height, "StraitX Ray")
     {
         m_Window.SetEventsHanlder({this, &Application::OnEvent});
-        m_Camera.Move({0, 1, -1});
+        m_Camera.Move({0, 1, 0});
         m_Camera.UploadToGPU();
         //for(int i = 0; i < 20; i++)
         //    m_SpheresStorageBuffer.Add({Vector2f(rand() % m_StorageTexture->Size().x, rand() % m_StorageTexture->Size().y )});
+        //m_SpheresStorageBuffer.Add({Vector3f( 0.0f, 0.f, 1.f), 0.5f, Color::Blue});
         m_SpheresStorageBuffer.Add({Vector3f( 0.5f, 0.f, 1.f), 0.5f, Color::Blue});
         m_SpheresStorageBuffer.Add({Vector3f(-0.5f, 0.f, 1.f), 0.5f, Color::Red});
-        m_SpheresStorageBuffer.Add({Vector3f( 0.0f, -100.5f, 1.f), 100.f, Color::Yellow});
+        //m_SpheresStorageBuffer.Add({Vector3f(-4.5f, 0.f, 1.f), 2.0f, Color::Yellow});
+        //m_SpheresStorageBuffer.Add({Vector3f(-1.5f, 0.f, 1.f), 0.5f, Color::White});
+        m_SpheresStorageBuffer.Add({Vector3f( 0.0f, -100.5f, 1.f), 100.f, Color::Black});
         m_SpheresStorageBuffer.UploadToGPU();
     }
 
@@ -59,7 +62,7 @@ public:
             Println("FPS: %, %", 1.f / dt, Keyboard::IsKeyPressed(Key::Space));
 
             if(Keyboard::IsKeyPressed(Key::W))
-                m_Camera.Move({0, 0, Speed * dt});
+                m_Camera.Move({0, 0, +Speed * dt});
             if(Keyboard::IsKeyPressed(Key::S))
                 m_Camera.Move({0, 0, -Speed * dt});
             if(Keyboard::IsKeyPressed(Key::D))

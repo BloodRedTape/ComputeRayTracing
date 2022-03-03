@@ -26,7 +26,7 @@ vec3 GetBackgroundColor(vec2 ndc){
 vec3 GetNormalColor(vec3 normal){
     return normal / 2 + vec3(0.5);
 }
-
+#if 1
 int Seed = int(gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * 2342344654);
 int RandMax = 32767;
 
@@ -43,7 +43,7 @@ float RandFloat(){
 vec3 RandVec3(){
     return normalize((vec3(RandFloat(), RandFloat(), RandFloat()) - vec3(0.5)) * 2);
 }
-
+#endif
 void Intersect(in Ray ray, in Sphere sphere, out int roots, out float t, out vec3 normal){
     vec3 o = ray.Origin - sphere.Position;
     float a = dot(ray.Direction, ray.Direction);
@@ -55,8 +55,8 @@ void Intersect(in Ray ray, in Sphere sphere, out int roots, out float t, out vec
     roots = int(d > 0);
 
     if(roots > 0){
-        float t1 = (b - sqrt(d))/(-2*a);
-        float t2 = (b + sqrt(d))/(-2*a);
+        float t1 = (-b - sqrt(d))/(2*a);
+        float t2 = (-b + sqrt(d))/(2*a);
 
         t = min(max(t1, 0), max(t2, 0));
 
@@ -79,17 +79,15 @@ layout(std140, row_major, binding = 1)uniform u_Camera{
 
 layout(rgba8, binding = 2)uniform writeonly image2D u_Output;
 const float FocalLength = 1.0;
-const int InteractionsCount = 4;
-vec2 Ndc;
+const int InteractionsCount = 5;
 
 vec3 Trace(Ray ray){
-    vec3 out_color = vec3(1.0);
+    vec3 accumulator = vec3(1);
 
     for(int i = 0; i<InteractionsCount; i++){
         float nearest_t = 999999999999999999999.9;
-        vec3 nearest_color = vec3(1.0, 1.0, 1.0);
+        vec3 nearest_color = vec3(1, 1, 1);//vec3(0.2, 0.8, 1.0);
         Ray nearest_ray = ray;
-        bool hit = false;
 
         float mult = pow(0.5, i);
 
@@ -100,21 +98,27 @@ vec3 Trace(Ray ray){
 
             Intersect(ray, Spheres[j], roots, t, normal);
 
-            if(roots > 0 && 0 < t && t < nearest_t){
+            if(roots > 0 && 0.0001 < t && t < nearest_t){
                 nearest_t = t;
                 nearest_color = Spheres[j].Color.rgb;
 
-                nearest_ray = MakeRay(At(ray, t), normal + RandVec3());
-                hit = true;
+                vec3 intersection_position = At(ray, t);
+
+                nearest_ray = MakeRay(intersection_position, RandVec3() + normal);
+                //nearest_color = GetNormalColor(normal);
+
+                //nearest_ray = MakeRay(At(ray, t), normal + RandVec3());
+
+                //vec3 reflected_direction = reflect(ray.Direction, normal);
+                //nearest_color = GetNormalColor(reflected_direction );
             }
         }
-
-        out_color = nearest_color * mult + out_color * (1.0 - mult);
+        accumulator = nearest_color * mult + accumulator * (1.0 - mult);
 
         ray = nearest_ray;
     }
 
-    return out_color;
+    return accumulator;
 }
 
 
@@ -122,7 +126,7 @@ void main(){
     const vec2 output_size = imageSize(u_Output);
     const ivec2 coord = ivec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y);
     const float aspect = float(output_size.x)/float(output_size.y);
-    Ndc = (vec2(coord) / output_size.y - vec2(aspect/2, 0.5)) * 2.0;
+    const vec2 Ndc = (vec2(coord) / output_size.y - vec2(aspect/2, 0.5)) * 2.0;
 
     const vec3 ray_direction = (CameraDirection * normalize(vec4(Ndc.xy, 1.0, 1.0))).xyz;
 
