@@ -2,9 +2,9 @@
 #include "utils.hpp"
 #include <graphics/api/gpu.hpp>
 
-const String RayTracingPipeline::s_TraceComputeSources = ReadEntireFile("../../../shaders/trace.glsl");
+const String RayTracingPipeline::s_TraceComputeSources = ReadEntireFile("shaders/trace.glsl.comp");
 
-void RayTracingPipeline::BindSpheresBuffer(const Buffer* spheres_buffer) {
+void RayTracingPipeline::BindSpheresBuffer(const StorageBufferList<Sphere> &spheres_buffer) {
     m_Set->UpdateStorageBufferBinding(0, 0, spheres_buffer);
 }
 

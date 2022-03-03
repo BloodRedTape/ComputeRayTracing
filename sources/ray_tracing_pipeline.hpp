@@ -4,6 +4,8 @@
 #include <core/unique_ptr.hpp>
 #include <core/array.hpp>
 #include <core/string.hpp>
+#include <core/math/vector3.hpp>
+#include <core/math/vector4.hpp>
 #include <graphics/api/texture.hpp>
 #include <graphics/api/semaphore.hpp>
 #include <graphics/api/buffer.hpp>
@@ -11,6 +13,13 @@
 #include <graphics/api/descriptor_set.hpp>
 #include <graphics/api/compute_pipeline.hpp>
 #include <graphics/api/shader.hpp>
+#include "storage_buffer_list.hpp"
+
+struct alignas(sizeof(Vector4f)) Sphere{
+    Vector3f Position;
+    float    Radius;
+    Vector4f Color;
+};
 
 class RayTracingPipeline {
 private:
@@ -59,7 +68,7 @@ private:
     };
 
 public:
-    void BindSpheresBuffer(const Buffer* spheres_buffer);
+    void BindSpheresBuffer(const StorageBufferList<Sphere> &spheres_buffer);
 
 	void Dispatch(const Texture2D &output, const Semaphore &wait, const Semaphore &signal);
 };

@@ -12,7 +12,7 @@ private:
     RenderWindow m_Window{1280, 720, "Compute !"};
     RectRenderer m_RectRenderer{m_Window.FramebufferPass()};
     
-    StorageBufferList<Vector2f> m_SpheresStorageBuffer;
+    StorageBufferList<Sphere> m_SpheresStorageBuffer;
 
     UniquePtr<Texture2D> m_StorageTexture{
         Texture2D::Create(
@@ -28,8 +28,11 @@ public:
     Application() {
         m_Window.SetEventsHanlder({this, &Application::OnEvent});
 
-        for(int i = 0; i < 20; i++)
-            m_SpheresStorageBuffer.Add(Vector2f(rand() % m_StorageTexture->Size().x, rand() % m_StorageTexture->Size().y ));
+        //for(int i = 0; i < 20; i++)
+        //    m_SpheresStorageBuffer.Add({Vector2f(rand() % m_StorageTexture->Size().x, rand() % m_StorageTexture->Size().y )});
+        m_SpheresStorageBuffer.Add({Vector3f( 0.5f, 0.f, 1.f), 0.5f, Color::Blue});
+        m_SpheresStorageBuffer.Add({Vector3f(-0.5f, 0.f, 1.f), 0.5f, Color::Red});
+        m_SpheresStorageBuffer.Add({Vector3f( 0.0f, -100.5f, 1.f), 100.f, Color::Yellow});
         m_SpheresStorageBuffer.UploadToGPU();
     }
 
@@ -43,7 +46,7 @@ public:
             m_Pipeline.Dispatch(*m_StorageTexture, acq, comp);
 
             m_RectRenderer.BeginDrawing(&comp, m_Window.CurrentFramebuffer());
-            m_RectRenderer.DrawRect({0,0}, m_StorageTexture->Size(), Color::White, m_StorageTexture.Get());
+            m_RectRenderer.DrawRect(Vector2s(0, m_StorageTexture->Size().y), Vector2s(m_StorageTexture->Size() * Vector2u(1, -1)), Color::White, m_StorageTexture.Get());
             m_RectRenderer.EndDrawing(&prs);
 
             m_Window.PresentCurrentFramebuffer(&prs);
@@ -55,6 +58,10 @@ public:
     void OnEvent(const Event& e) {
         if(e.Type == EventType::WindowClose)
             m_Window.Close();
+
+        if(e.Type == EventType::KeyPress)
+            if(e.KeyPress.KeyCode == Key::Q)
+                m_Window.Close();
     }
 };
 

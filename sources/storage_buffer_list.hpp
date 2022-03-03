@@ -3,6 +3,7 @@
 
 #include <core/unique_ptr.hpp>
 #include <core/list.hpp>
+#include <core/math/functions.hpp>
 #include <graphics/api/buffer.hpp>
 
 template<typename Type>
@@ -26,8 +27,8 @@ public:
         if (m_StorageBuffer->Size() < required_size)
             m_StorageBuffer->Realloc(required_size);
 
-        m_StorageBuffer->Copy(&count,           count_size,     0);
-        m_StorageBuffer->Copy(&(*this)[0],  positions_size, 2*count_size);
+        m_StorageBuffer->Copy(&count,           count_size, 0);
+        m_StorageBuffer->Copy(&(*this)[0],  positions_size, Math::AlignUp<size_t>(count_size, alignof(Type)));
     }
 
     operator const Buffer*()const {
