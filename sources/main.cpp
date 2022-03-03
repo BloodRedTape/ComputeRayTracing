@@ -11,9 +11,11 @@
 #include "utils.hpp"
 #include "camera.hpp"
 
+#include <cstdio>
+
 class Application {
 private:
-    RenderWindow m_Window{1280, 720, "Compute !"};
+    RenderWindow m_Window;
     RectRenderer m_RectRenderer{m_Window.FramebufferPass()};
     
     StorageBufferList<Sphere> m_SpheresStorageBuffer;
@@ -30,9 +32,12 @@ private:
 
     RayTracingPipeline m_Pipeline;
 public:
-    Application() {
+    Application(int width, int height) :
+        m_Window(width, height, "StraitX Ray")
+    {
         m_Window.SetEventsHanlder({this, &Application::OnEvent});
-
+        m_Camera.Move({0, 1, -1});
+        m_Camera.UploadToGPU();
         //for(int i = 0; i < 20; i++)
         //    m_SpheresStorageBuffer.Add({Vector2f(rand() % m_StorageTexture->Size().x, rand() % m_StorageTexture->Size().y )});
         m_SpheresStorageBuffer.Add({Vector3f( 0.5f, 0.f, 1.f), 0.5f, Color::Blue});
@@ -51,6 +56,7 @@ public:
 
         while(m_Window.IsOpen()) {
             float dt = cl.Restart().AsSeconds();
+            Println("FPS: %, %", 1.f / dt, Keyboard::IsKeyPressed(Key::Space));
 
             if(Keyboard::IsKeyPressed(Key::W))
                 m_Camera.Move({0, 0, Speed * dt});
@@ -100,6 +106,15 @@ public:
 };
 
 int StraitXMain(Span<const char*> args){
-    Application().Run();
+    int width = 1280, height = 720;
+    if(args.Size() == 3){
+        std::sscanf(args[1],"%d", &width);
+        std::sscanf(args[2],"%d", &height);
+    }else{
+        Println("Fallback to 720p");
+    }
+
+    Application(width, height).Run();
+
     return 0;
 }

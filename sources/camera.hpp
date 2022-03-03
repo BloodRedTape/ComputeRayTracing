@@ -10,16 +10,17 @@
 
 class Camera {
 private:
-	UniquePtr<Buffer> m_UniformBuffer{
-		Buffer::Create(
-			sizeof(Matrix4f), 
-			BufferMemoryType::DynamicVRAM, 
-			BufferUsageBits::TransferDestination | BufferUsageBits::UniformBuffer
-		)
-	};
 	struct UniformLayout{
 		Matrix4f CameraDirection;
 		Vector3f CameraPosition;
+	};
+
+	UniquePtr<Buffer> m_UniformBuffer{
+		Buffer::Create(
+			sizeof(UniformLayout), 
+			BufferMemoryType::DynamicVRAM, 
+			BufferUsageBits::TransferDestination | BufferUsageBits::UniformBuffer
+		)
 	};
 
 	Vector3f m_Position{0, 0, 0};
