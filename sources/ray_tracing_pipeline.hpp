@@ -33,7 +33,7 @@ private:
         m_Pool->Alloc(), {m_Pool.Get()}
     };
 
-    const Array<ShaderBinding, 2> m_Bindings {
+    const Array<ShaderBinding, 3> m_Bindings {
         ShaderBinding{
             0,
             1,
@@ -42,6 +42,12 @@ private:
         },
         ShaderBinding{
             1,
+            1,
+            ShaderBindingType::UniformBuffer,
+            ShaderStageBits::Compute
+        },
+        ShaderBinding{
+            2,
             1,
             ShaderBindingType::StorageTexture,
             ShaderStageBits::Compute
@@ -69,6 +75,8 @@ private:
 
 public:
     void BindSpheresBuffer(const StorageBufferList<Sphere> &spheres_buffer);
+
+    void BindCameraBuffer(const Buffer *camera_buffer);
 
 	void Dispatch(const Texture2D &output, const Semaphore &wait, const Semaphore &signal);
 };

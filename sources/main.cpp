@@ -3,9 +3,13 @@
 #include <graphics/render_window.hpp>
 #include <2d/rect_renderer.hpp>
 #include <core/print.hpp>
+#include <core/os/keyboard.hpp>
+#include <core/os/mouse.hpp>
+#include <core/os/clock.hpp>
 #include "storage_buffer_list.hpp"
 #include "ray_tracing_pipeline.hpp"
 #include "utils.hpp"
+#include "camera.hpp"
 
 class Application {
 private:
@@ -13,6 +17,7 @@ private:
     RectRenderer m_RectRenderer{m_Window.FramebufferPass()};
     
     StorageBufferList<Sphere> m_SpheresStorageBuffer;
+    Camera m_Camera;
 
     UniquePtr<Texture2D> m_StorageTexture{
         Texture2D::Create(
@@ -39,10 +44,39 @@ public:
     void Run() {
         Semaphore acq, comp, prs;
 
+        Clock cl;
+        const float Speed = 1;
+        const float MouseSpeed = 0.5f;
+        Vector2f last_position = Mouse::RelativePosition(m_Window);
+
         while(m_Window.IsOpen()) {
+            float dt = cl.Restart().AsSeconds();
+
+            if(Keyboard::IsKeyPressed(Key::W))
+                m_Camera.Move({0, 0, Speed * dt});
+            if(Keyboard::IsKeyPressed(Key::S))
+                m_Camera.Move({0, 0, -Speed * dt});
+            if(Keyboard::IsKeyPressed(Key::D))
+                m_Camera.Move({+Speed * dt, 0, 0});
+            if(Keyboard::IsKeyPressed(Key::A))
+                m_Camera.Move({-Speed * dt, 0, 0});
+            if(Keyboard::IsKeyPressed(Key::Space))
+                m_Camera.Move({0, +Speed * dt, 0});
+            if(Keyboard::IsKeyPressed(Key::LeftShift))
+                m_Camera.Move({0, -Speed * dt, 0});
+
+            const Vector2f current_position = Mouse::RelativePosition(m_Window);
+            const Vector2f offset = current_position - last_position;
+            last_position = current_position;
+
+            m_Camera.RotationX += offset.y * MouseSpeed;
+            m_Camera.RotationY += offset.x * MouseSpeed;
+
             m_Window.AcquireNextFramebuffer(&acq);
 
+            m_Camera.UploadToGPU();
             m_Pipeline.BindSpheresBuffer(m_SpheresStorageBuffer);
+            m_Pipeline.BindCameraBuffer(m_Camera);
             m_Pipeline.Dispatch(*m_StorageTexture, acq, comp);
 
             m_RectRenderer.BeginDrawing(&comp, m_Window.CurrentFramebuffer());

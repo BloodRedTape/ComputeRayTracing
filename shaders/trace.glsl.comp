@@ -72,10 +72,14 @@ layout(std140, binding = 0)buffer u_SpheresBuffer{
     Sphere Spheres[];
 };
 
-layout(rgba8, binding = 1)uniform writeonly image2D u_Output;
-const vec3 CameraPosition = vec3(0, 0, 0);
+layout(std140, row_major, binding = 1)uniform u_Camera{
+    mat4 CameraDirection;
+    vec3 CameraPosition;
+};
+
+layout(rgba8, binding = 2)uniform writeonly image2D u_Output;
 const float FocalLength = 1.0;
-const int InteractionsCount = 40;
+const int InteractionsCount = 4;
 vec2 Ndc;
 
 vec3 Trace(Ray ray){
@@ -120,7 +124,7 @@ void main(){
     const float aspect = float(output_size.x)/float(output_size.y);
     Ndc = (vec2(coord) / output_size.y - vec2(aspect/2, 0.5)) * 2.0;
 
-    const vec3 ray_direction = vec3(Ndc.xy, 1.0);
+    const vec3 ray_direction = (CameraDirection * normalize(vec4(Ndc.xy, 1.0, 1.0))).xyz;
 
     const Ray ray = MakeRay(CameraPosition, ray_direction);
 
